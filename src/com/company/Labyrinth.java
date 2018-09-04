@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 public class Labyrinth {
 
+    // Map info
     private List<String> strLabyrinth = new ArrayList<>();
     private char[][] gridLabyrinth;
     private int nrows, ncols;
@@ -16,6 +17,8 @@ public class Labyrinth {
     // Flag
     private boolean solved = false;
 
+    // Elements
+    private char goal = '.';
     private char[] obstacles = {'#', '$', '*'};
     private char[] directions = {'U', 'L', 'D', 'R'};
 
@@ -124,7 +127,10 @@ public class Labyrinth {
 
         rPath(visited, playerPosition[0], playerPosition[1], path_solution);
 
-        return "";
+        if (!solved)
+            return "no path";
+
+        return formatSolution(path_solution);
     }
 
 
@@ -141,7 +147,7 @@ public class Labyrinth {
 
         if (isGoal(current_row, current_col)) {
             solved = true;
-            printSolution(current_solution);
+            System.out.println(formatSolution(current_solution));
             return;
         }
 
@@ -170,9 +176,9 @@ public class Labyrinth {
 
     }
 
-    private void printSolution(LinkedList<Character> current_solution) {
+    private String formatSolution(LinkedList<Character> current_solution) {
 
-        System.out.println(current_solution.stream().map(x -> x.toString()).collect(Collectors.joining(" ")));
+       return current_solution.stream().map(x -> x.toString()).collect(Collectors.joining(" "));
 
     }
 
@@ -224,7 +230,7 @@ public class Labyrinth {
     }
 
     private boolean isGoal(int row, int col) {
-        return (gridLabyrinth[row][col] == '.');
+        return (gridLabyrinth[row][col] == goal);
     }
 
     private boolean noPossibleMoves(boolean[][] visited, int current_row, int current_col) {

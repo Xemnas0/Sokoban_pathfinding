@@ -6,14 +6,15 @@ public class Main {
 
         // Get file name for arguments
         //String filename = args[0];
-        String[] filename = {"map1.txt", "map2.txt", "map3.txt"};
+        String[] filename = {"map1.txt", "map2.txt", "map3.txt", "map4.txt"};
 
-        Labyrinth labyrinth = new Labyrinth(filename[0]);
+        Labyrinth labyrinth = new Labyrinth(filename[2]);
 
         System.out.println(labyrinth.getMap());
 
+        // If a '+' element has been found, the player is already on goal, and the game is ended
         if (labyrinth.checkEnd()) {
-            System.out.println("The game is already ended.");
+            System.out.println("");
             return;
         }
 
