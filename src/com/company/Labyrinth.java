@@ -22,11 +22,55 @@ public class Labyrinth {
     private char[] obstacles = {'#', '$', '*'};
     private char[] directions = {'U', 'L', 'D', 'R'};
 
+    // Solution
+    private String finalSolution;
+
+    /***
+     * Constructor that reads from System.in
+     */
+    public Labyrinth() {
+
+        // Get map from stdin and save
+        Scanner sc = new Scanner(System.in);
+        while (sc.hasNextLine())
+            strLabyrinth.add(sc.nextLine());
+
+        // Initialize grid
+        nrows = strLabyrinth.size();
+        int max = 0;
+        for(String s: strLabyrinth){
+            if(s.length() > max)
+                max = s.length();
+        }
+        ncols = max;
+//        ncols = strLabyrinth.get(0).length();
+
+        //DEBUG
+        //System.out.println("Map dimensions: [" + nrows + ", " + ncols + "]");
+
+        gridLabyrinth = new char[nrows][ncols];
+
+        // From strings to char matrix
+        for (int i = 0; i < nrows; i++) {
+            String row = strLabyrinth.get(i);
+            gridLabyrinth[i] = row.toCharArray();
+        }
+
+
+    }
+
+    /***
+     * Constructor that reads from file
+     * @param filename
+     */
     public Labyrinth(String filename) {
         // This will reference one line at a time
         String line;
 
+
         try {
+
+
             // FileReader reads text files in the default encoding.
             FileReader fileReader =
                     new FileReader(filename);
@@ -44,9 +88,16 @@ public class Labyrinth {
 
             // Initialize grid
             nrows = strLabyrinth.size();
-            ncols = strLabyrinth.get(0).length();
 
-            System.out.println("Map dimensions: [" + nrows + ", " + ncols + "]");
+            int max = 0;
+            for(String s: strLabyrinth){
+                if(s.length() > max)
+                    max = s.length();
+            }
+            ncols = max;
+
+            //DEBUG
+            //System.out.println("Map dimensions: [" + nrows + ", " + ncols + "]");
 
             gridLabyrinth = new char[nrows][ncols];
 
@@ -54,9 +105,6 @@ public class Labyrinth {
             for (int i = 0; i < nrows; i++) {
                 String row = strLabyrinth.get(i);
                 gridLabyrinth[i] = row.toCharArray();
-//                for (int j = 0; j < ncols-1; j++) {
-//                    gridLabyrinth[i][j] = row.charAt(j);
-                //}
             }
 
 
@@ -70,7 +118,7 @@ public class Labyrinth {
                     "Error reading file '"
                             + filename + "'");
             // Or we could just do this:
-            // ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
@@ -123,14 +171,15 @@ public class Labyrinth {
         boolean finished = false;
         LinkedList<Character> path_solution = new LinkedList<Character>();
 
-        System.out.println("Player found at position: " + Arrays.toString(playerPosition));
+        //DEBUG
+        //System.out.println("Player found at position: " + Arrays.toString(playerPosition));
 
         rPath(visited, playerPosition[0], playerPosition[1], path_solution);
 
         if (!solved)
             return "no path";
 
-        return formatSolution(path_solution);
+        return finalSolution;
     }
 
 
@@ -138,22 +187,25 @@ public class Labyrinth {
         visited[current_row][current_col] = true;
 
         //DEBUG
-        System.out.println("I'm in [" + current_row + ", " + current_col + "]");
+        //System.out.println("I'm in [" + current_row + ", " + current_col + "]");
+
+        if (isGoal(current_row, current_col)) {
+            solved = true;
+            finalSolution = formatSolution(current_solution);
+            //System.out.println(formatSolution(current_solution));
+            return;
+        }
 
         if (noPossibleMoves(visited, current_row, current_col)) {
             visited[current_row][current_col] = false;
             return;
         }
 
-        if (isGoal(current_row, current_col)) {
-            solved = true;
-            System.out.println(formatSolution(current_solution));
-            return;
-        }
+
 
 
         for (char direction : directions) {
-            if(solved)
+            if (solved)
                 return;
 
 
@@ -176,9 +228,9 @@ public class Labyrinth {
 
     }
 
-    private String formatSolution(LinkedList<Character> current_solution) {
+    private String formatSolution(LinkedList<Character> solution) {
 
-       return current_solution.stream().map(x -> x.toString()).collect(Collectors.joining(" "));
+        return solution.stream().map(x -> x.toString()).collect(Collectors.joining(" "));
 
     }
 
@@ -213,14 +265,15 @@ public class Labyrinth {
     private boolean isAccessible(int row, int col) {
 
         //If the cell is out of the map, it is not accessible
-        if (outOfMap(row, col))
+        if (outOfMap(row, col)) {
+            //System.out.println("Out of map in [" + row + ", " + col + "]");
             return false;
-
+        }
         //If the cell is blocked by an obstacle, it is not accessible
         for (char c : obstacles) {
             if (gridLabyrinth[row][col] == c) {
                 //DEBUG
-                System.out.println("Obstacle " + c + " in [" + row + ", " + col + "]");
+                //System.out.println("Obstacle " + c + " in [" + row + ", " + col + "]");
                 return false;
             }
         }
@@ -253,14 +306,14 @@ public class Labyrinth {
     }
 
     private boolean outOfMap(int row, int col) {
-        return (row < 0 || row >= nrows || col < 0 || col >= ncols);
+        return (row < 0 || row >= nrows || col < 0 || col >= gridLabyrinth[row].length);
     }
 
 
     private int[] findPlayerPosition() {
         int[] pos = new int[2];
         for (int i = 0; i < nrows; i++) {
-            for (int j = 0; j < ncols; j++) {
+            for (int j = 0; j < gridLabyrinth[i].length; j++) {
                 if (gridLabyrinth[i][j] == '@') {
                     pos[0] = i;
                     pos[1] = j;
